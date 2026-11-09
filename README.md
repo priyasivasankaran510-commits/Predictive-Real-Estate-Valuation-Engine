@@ -1,4 +1,32 @@
-PREDICTIVE REAL ESTATE VALUATION ENGINEProject Execution and Technical Implementation Report — Week 3Document Title: Execution and Implementation Strategy DocumentRole / Track: Data Science Project CoordinatorDomain & Target Dataset: PropTech / Real Estate Analytics (Ames Iowa Housing Dataset: 2,930 records, 81 columns)Date & Status: November 9, 2026 | Final Draft (Includes Flowcharts, Diagrams & Ethical Governance Framework)Executive SummaryProject OverviewThis repository contains the technical execution and implementation framework for the Predictive Real Estate Valuation Engine. Acting as Data Science Project Coordinator, this project bridges machine learning model development with structured cross-functional Agile Scrum coordination, robust software engineering standards, and comprehensive ethical AI governance. Building on our preprocessed Ames Iowa Housing Dataset ($N = 2,930$ rows, $81$ columns), this strategy defines model development workflows, Agile sprint structures, automated PyTest testing benchmarks, and Fair Housing Act bias mitigation protocols to achieve production-grade model accuracy ($R^2 \ge 0.85$, MAPE $< 7\%$).Core Strategic ObjectivesCross-Functional Team Coordination: Establish a structured 2-week Agile Scrum cadence aligning Data Engineers, Data Scientists, and MLOps Engineers with automated CI/CD pipelines and GitFlow branching strategies.Model Training & Cross-Validation Architecture: Implement baseline Ridge Regression, Random Forest Regressors, and XGBoost Regressors with 5-fold cross-validation and hyperparameter optimization via GridSearchCV.Ethical AI & Fair Housing Governance: Enforce strict compliance with the Fair Housing Act by purging demographic proxy features, auditing Disparate Impact Ratios ($0.90 \le \text{Ratio} \le 1.10$), and integrating SHAP feature attribution waterfall plots for 100% explainable automated property valuations.Technical Pipeline Architecture & Flowcharts1. Agile Scrum Operational Workflow FlowchartAGILE SCRUM OPERATIONAL FLOWCHART & CEREMONIES
+# PREDICTIVE REAL ESTATE VALUATION ENGINE
+
+## Project Execution and Technical Implementation Report — Week 3
+
+**Document Title**: Execution and Implementation Strategy Document  
+**Role / Track**: Data Science Project Coordinator  
+**Domain & Target Dataset**: PropTech / Real Estate Analytics (Ames Iowa Housing Dataset: 2,930 records, 81 columns)  
+**Date & Status**: November 9, 2026 | Final Draft (Includes Flowcharts, Diagrams & Ethical Governance Framework)  
+
+---
+
+## Executive Summary
+
+### Project Overview
+This repository contains the technical execution and implementation framework for the **Predictive Real Estate Valuation Engine**. Acting as Data Science Project Coordinator, this project bridges machine learning model development with structured cross-functional Agile Scrum coordination, robust software engineering standards, and comprehensive ethical AI governance. Building on our preprocessed Ames Iowa Housing Dataset ($N = 2,930$ rows, $81$ columns), this strategy defines model development workflows, Agile sprint structures, automated PyTest testing benchmarks, and Fair Housing Act bias mitigation protocols to achieve production-grade model accuracy ($R^2 \ge 0.85$, MAPE $< 7\%$).
+
+### Core Strategic Objectives
+* **Cross-Functional Team Coordination**: Establish a structured 2-week Agile Scrum cadence aligning Data Engineers, Data Scientists, and MLOps Engineers with automated CI/CD pipelines and GitFlow branching strategies.
+* **Model Training & Cross-Validation Architecture**: Implement baseline Ridge Regression, Random Forest Regressors, and XGBoost Regressors with 5-fold cross-validation and hyperparameter optimization via `GridSearchCV`.
+* **Ethical AI & Fair Housing Governance**: Enforce strict compliance with the Fair Housing Act by purging demographic proxy features, auditing Disparate Impact Ratios ($0.90 \le \text{Ratio} \le 1.10$), and integrating SHAP feature attribution waterfall plots for 100% explainable automated property valuations.
+
+---
+
+## Technical Pipeline Architecture & Flowcharts
+
+### 1. Agile Scrum Operational Workflow Flowchart
+
+```text
+AGILE SCRUM OPERATIONAL FLOWCHART & CEREMONIES
 ─────────────────────────────────────────────────────────────────────────────
 [Sprint Backlog Prioritization] ──► Daily Standup (15-min sync / async check-in)
                                           │
@@ -7,29 +35,6 @@ PREDICTIVE REAL ESTATE VALUATION ENGINEProject Execution and Technical Implement
                  │
                  ▼
 [Sprint Retrospective: Process Optimization & CI/CD Review]
-Daily Standup (9:30 AM): Focuses on 3 key checkpoints: What was completed yesterday? What is planned today? Are there any technical blockers?Sprint Review & Demo: Live demonstration of candidate model benchmarks ($R^2$, MAE, RMSE) and API endpoints to real estate business stakeholders.Sprint Retrospective: Evaluation of code review bottlenecks, data pipeline execution logs, and sprint velocity.2. Model Training, Validation & Deployment Architecture FlowchartMODEL TRAINING, VALIDATION & DEPLOYMENT ARCHITECTURE FLOWCHART
-─────────────────────────────────────────────────────────────────────────────
-  [Preprocessed Matrix (N=2,925)] ──► 80/20 Train-Test Split (Train n=2,340 | Test n=585)
-                                                 │
-                                                 ▼
-  [5-Fold Stratified Cross-Validation] ──► K-Fold Validation (Folds K1 to K5)
-                                                 │
-                                                 ▼
-  [Hyperparameter Tuning Engine] ────────► GridSearchCV / RandomizedSearchCV
-                                                 │
-                                                 ▼
-  [Model Evaluation Benchmarking] ───────► Candidate Comparison (Ridge vs. RF vs. XGBoost)
-                                                 │
-                                                 ▼
-  [Model Serialization & Artifact Export] ──► Save Trained Model -> xgboost_real_estate_model.joblib
-Section 1: Team Roles & Software Engineering Standards1.1 Cross-Functional Team Responsibilities MatrixRole TitlePrimary ResponsibilitiesKey DeliverablesTech StackProject CoordinatorSprint backlog management, risk tracking, stakeholder reportingWBS Schedule, Risk Matrix, Sprint ReportsJira, Confluence, GitHub ProjectsData EngineerData ingestion, schema validation, feature engineering pipelineClean Data Matrix, preprocessor_v2.joblibPandas, NumPy, Scikit-LearnData ScientistEDA, baseline modeling, hyperparameter tuning, SHAP explainabilityTrained Checkpoints, Model Benchmark ReportsScikit-Learn, XGBoost, SHAPMLOps / Software EngineerModel deployment, API endpoints, unit testing, CI/CD pipelinesStreamlit UI, Docker Container, PyTest SuiteStreamlit, FastAPI, PyTest, GitHub Actions1.2 Git Branching Strategy & Automated Quality AssuranceGitFlow Workflow: Production code lives strictly on main. Active development merges into develop. Feature builds execute on isolated feature/* branches (e.g., feature/xgb-tuning). Direct commits to main are blocked.Mandatory Code Reviews: Every Pull Request (PR) requires approval from at least 1 Senior Data Scientist and automated passing of PyTest integration suites before merging.Automated Unit Tests: PyTest suites programmatically verify that feature preprocessing outputs zero missing values, zero infinite numbers, and that model inference executes in under $200\text{ms}$ per query.Section 2: Executable Model Training & Validation Scriptimport numpy as np
-import pandas as pd
-import joblib
-from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
-from sklearn.linear_model import Ridge
-from sklearn.ensemble import RandomForestRegressor
-from xgboost import XGBRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 # 1. Load Preprocessed Features and Log-Transformed Target Matrix
 # Note: Assuming preprocessor_v2.joblib has transformed raw dataset into X_train_trans (2340, 218)
