@@ -1,92 +1,86 @@
-# PREDICTIVE REAL ESTATE VALUATION ENGINE
-## Data Acquisition and Management Planning Report — Week 2
+PREDICTIVE REAL ESTATE VALUATION ENGINEProject Execution and Technical Implementation Report — Week 3Document Title: Execution and Implementation Strategy DocumentRole / Track: Data Science Project CoordinatorDomain & Target Dataset: PropTech / Real Estate Analytics (Ames Iowa Housing Dataset: 2,930 records, 81 columns)Date & Status: November 9, 2026 | Final Draft (Includes Flowcharts, Diagrams & Ethical Governance Framework)Executive SummaryProject OverviewThis repository contains the technical execution and implementation framework for the Predictive Real Estate Valuation Engine. Acting as Data Science Project Coordinator, this project bridges machine learning model development with structured cross-functional Agile Scrum coordination, robust software engineering standards, and comprehensive ethical AI governance. Building on our preprocessed Ames Iowa Housing Dataset ($N = 2,930$ rows, $81$ columns), this strategy defines model development workflows, Agile sprint structures, automated PyTest testing benchmarks, and Fair Housing Act bias mitigation protocols to achieve production-grade model accuracy ($R^2 \ge 0.85$, MAPE $< 7\%$).Core Strategic ObjectivesCross-Functional Team Coordination: Establish a structured 2-week Agile Scrum cadence aligning Data Engineers, Data Scientists, and MLOps Engineers with automated CI/CD pipelines and GitFlow branching strategies.Model Training & Cross-Validation Architecture: Implement baseline Ridge Regression, Random Forest Regressors, and XGBoost Regressors with 5-fold cross-validation and hyperparameter optimization via GridSearchCV.Ethical AI & Fair Housing Governance: Enforce strict compliance with the Fair Housing Act by purging demographic proxy features, auditing Disparate Impact Ratios ($0.90 \le \text{Ratio} \le 1.10$), and integrating SHAP feature attribution waterfall plots for 100% explainable automated property valuations.Technical Pipeline Architecture & Flowcharts1. Agile Scrum Operational Workflow FlowchartAGILE SCRUM OPERATIONAL FLOWCHART & CEREMONIES
+─────────────────────────────────────────────────────────────────────────────
+[Sprint Backlog Prioritization] ──► Daily Standup (15-min sync / async check-in)
+                                          │
+                                          ▼
+[Sprint Review & Stakeholder Demo] ◄── [Sprint Execution: Feature Dev & Model Training]
+                 │
+                 ▼
+[Sprint Retrospective: Process Optimization & CI/CD Review]
+Daily Standup (9:30 AM): Focuses on 3 key checkpoints: What was completed yesterday? What is planned today? Are there any technical blockers?Sprint Review & Demo: Live demonstration of candidate model benchmarks ($R^2$, MAE, RMSE) and API endpoints to real estate business stakeholders.Sprint Retrospective: Evaluation of code review bottlenecks, data pipeline execution logs, and sprint velocity.2. Model Training, Validation & Deployment Architecture FlowchartMODEL TRAINING, VALIDATION & DEPLOYMENT ARCHITECTURE FLOWCHART
+─────────────────────────────────────────────────────────────────────────────
+  [Preprocessed Matrix (N=2,925)] ──► 80/20 Train-Test Split (Train n=2,340 | Test n=585)
+                                                 │
+                                                 ▼
+  [5-Fold Stratified Cross-Validation] ──► K-Fold Validation (Folds K1 to K5)
+                                                 │
+                                                 ▼
+  [Hyperparameter Tuning Engine] ────────► GridSearchCV / RandomizedSearchCV
+                                                 │
+                                                 ▼
+  [Model Evaluation Benchmarking] ───────► Candidate Comparison (Ridge vs. RF vs. XGBoost)
+                                                 │
+                                                 ▼
+  [Model Serialization & Artifact Export] ──► Save Trained Model -> xgboost_real_estate_model.joblib
+Section 1: Team Roles & Software Engineering Standards1.1 Cross-Functional Team Responsibilities MatrixRole TitlePrimary ResponsibilitiesKey DeliverablesTech StackProject CoordinatorSprint backlog management, risk tracking, stakeholder reportingWBS Schedule, Risk Matrix, Sprint ReportsJira, Confluence, GitHub ProjectsData EngineerData ingestion, schema validation, feature engineering pipelineClean Data Matrix, preprocessor_v2.joblibPandas, NumPy, Scikit-LearnData ScientistEDA, baseline modeling, hyperparameter tuning, SHAP explainabilityTrained Checkpoints, Model Benchmark ReportsScikit-Learn, XGBoost, SHAPMLOps / Software EngineerModel deployment, API endpoints, unit testing, CI/CD pipelinesStreamlit UI, Docker Container, PyTest SuiteStreamlit, FastAPI, PyTest, GitHub Actions1.2 Git Branching Strategy & Automated Quality AssuranceGitFlow Workflow: Production code lives strictly on main. Active development merges into develop. Feature builds execute on isolated feature/* branches (e.g., feature/xgb-tuning). Direct commits to main are blocked.Mandatory Code Reviews: Every Pull Request (PR) requires approval from at least 1 Senior Data Scientist and automated passing of PyTest integration suites before merging.Automated Unit Tests: PyTest suites programmatically verify that feature preprocessing outputs zero missing values, zero infinite numbers, and that model inference executes in under $200\text{ms}$ per query.Section 2: Executable Model Training & Validation Scriptimport numpy as np
+import pandas as pd
+import joblib
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.linear_model import Ridge
+from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-**Document Title**: Data Acquisition and Management Planning  
-**Role / Track**: Data Science Project Coordinator  
-**Domain & Target Dataset**: PropTech / Real Estate Analytics (Ames Iowa Housing Dataset: 2,930 records, 81 columns)  
-**Date & Status**: November 6, 2026 | Revision 2.0 (Enhanced Concrete Metrics & Worked Examples)  
+# 1. Load Preprocessed Features and Log-Transformed Target Matrix
+# Note: Assuming preprocessor_v2.joblib has transformed raw dataset into X_train_trans (2340, 218)
+# Target log-transformed: y_train_log = ln(SalePrice)
 
----
+# 2. Initialize Model Candidates
+ridge = Ridge(alpha=10.0)
+rf = RandomForestRegressor(n_estimators=150, max_depth=15, random_state=42)
+xgb = XGBRegressor(n_estimators=200, learning_rate=0.05, max_depth=6, random_state=42)
 
-## Executive Summary
+# 3. Execute 5-Fold Cross-Validation Benchmark on Training Set (n = 2,340)
+for name, model in [('Ridge', ridge), ('Random Forest', rf), ('XGBoost', xgb)]:
+    cv_scores = cross_val_score(model, X_train_trans, y_train_log, cv=5, scoring='r2')
+    print(f'{name} 5-Fold Mean R2 Score: {cv_scores.mean():.4f} (+/- {cv_scores.std():.4f})')
 
-### Project Overview
-This document details the data acquisition, governance, and management plan for the Predictive Real Estate Valuation Engine. Acting as Data Science Project Coordinator, this strategy establishes concrete data governance, mathematical preprocessing workflows, and annotated Python implementations for a dataset of N = 2,930 residential real estate transactions across 81 distinct property features. By quantifying missingness thresholds, outlier bounds, mathematical formulas, scaling parameters, and exact memory overheads, this report guarantees complete engineering reproducibility and prevents downstream data leakage.
+# 4. Hyperparameter Optimization via GridSearchCV on XGBoost
+param_grid = {
+    'n_estimators': [100, 200],
+    'learning_rate': [0.03, 0.05, 0.1],
+    'max_depth': [4, 6, 8]
+}
+grid_search = GridSearchCV(xgb, param_grid, cv=5, scoring='r2', n_jobs=-1)
+grid_search.fit(X_train_trans, y_train_log)
+best_xgb = grid_search.best_estimator_
 
-### Core Strategic Objectives
-* **Data Governance & Anonymization**: Ensure PII protection by SHA-256 hashing property identifiers (PID) and adhering strictly to Fair Housing Act guidelines and CC0 open-data licensing.
-* **Mathematical Preprocessing**: Execute a structured 5-stage pipeline covering log-transformation (ln(SalePrice)), IQR outlier isolation, median missing value imputation, and z-score standard scaling.
-* **Pipeline Reproducibility**: Bundle preprocessing transformers via Scikit-Learn ColumnTransformer and serialize trained artifacts (preprocessor_v2.joblib) for production deployment.
+# 5. Final Holdout Set Evaluation (n = 585 instances)
+y_pred_log = best_xgb.predict(X_test_trans)
+y_pred_actual = np.expm1(y_pred_log)      # Convert back to USD dollars
+y_test_actual = np.expm1(y_test_log)
 
-### Key Technical Metrics & Statistics
-* **Sample Size & Features**: N = 2,930 records across 81 feature columns (37 continuous/discrete numerical, 43 nominal/ordinal categorical, 1 target label).
-* **Target Variable (SalePrice)**: Range: $12,789.00 to $755,000.00; Mean: $180,796.10; Median: $160,000.00; Standard Deviation: $79,886.69; Skewness: +1.88 (reduced to +0.12 post-log transform).
-* **Outlier Isolation Impact**: IQR calculation (Q1=1,126 sq ft, Q3=1,745 sq ft, IQR=619 sq ft) isolated and removed 5 extreme anomalies (>4,000 sq ft with price <$200k).
+r2 = r2_score(y_test_actual, y_pred_actual)
+mae = mean_absolute_error(y_test_actual, y_pred_actual)
+mape = np.mean(np.abs((y_test_actual - y_pred_actual) / y_test_actual)) * 100
+rmse = np.sqrt(mean_squared_error(y_test_actual, y_pred_actual))
 
----
+print(f'=== Final Test Set Performance Results ===')
+print(f'R2 Score: {r2:.4f} (Target Metric: >= 0.85)')
+print(f'Mean Absolute Error (MAE): ${mae:,.2f}')
+print(f'Mean Absolute Percentage Error (MAPE): {mape:.2f}% (Target Metric: < 7%)')
+print(f'Root Mean Squared Error (RMSE): ${rmse:,.2f}')
 
-## Section 1: Data Sourcing & Acquisition Strategy
+# 6. Serialize Final Trained Model Artifact
+joblib.dump(best_xgb, 'xgboost_real_estate_model.joblib')
+print('Final XGBoost model serialized to xgboost_real_estate_model.joblib')
+Section 3: Ethical AI Governance & Fair Housing ComplianceTo prevent automated algorithms from perpetuating historical housing discrimination (redlining), our execution architecture enforces four mandatory ethical guardrails:Demographic Proxy Removal: Census tract identifiers, racial demographic statistics, household income tiers, and crime metrics are strictly purged from the model feature space. Neighborhood variables are restricted exclusively to official municipal zoning names.Disparate Impact Ratio Audit: Valuations across historically underserved postal zones versus high-income zones are continuously audited using the mathematical formula:
+$$\text{Disparate Impact Ratio} = \frac{(\text{Average Predicted Value} / \text{Average Actual Value})_{\text{Group A}}}{(\text{Average Predicted Value} / \text{Average Actual Value})_{\text{Group B}}}$$
+A compliance threshold of $0.90 \le \text{Ratio} \le 1.10$ is strictly required across all model deployments.SHAP Feature Explainability: To eliminate "black box" machine learning predictions, SHAP (SHapley Additive exPlanations) values are computed for every transaction. Real estate agents and clients receive waterfall plots detailing exact valuation contributions (e.g., $+\$25,000$ for OverallQual=8, $-\$12,000$ for Property_Age=45).Human-in-the-Loop Override Protocol: Any automated price estimate that deviates by more than $15\%$ from recent historical neighborhood comparable sales is automatically flagged for manual evaluation by a certified human appraiser.Repository Structure├── docs/
+│   ├── Week1_Project_Planning_Report.docx
+│   ├── Week2_Data_Acquisition_Management_Plan_v2.docx
+│   └── Week3_Execution_Implementation_Plan.docx
+├── preprocessor_v2.joblib
+├── xgboost_real_estate_model.joblib
+└── README.md
 
-### 1.1 Target Dataset Specifications & Memory Footprint
-* **Benchmark Dataset**: Ames Iowa Housing Transaction Dataset (Open-source Public Real Estate Repository).
-* **Exact Sample Size (N)**: 2,930 total property transaction instances.
-* **Total Features (K)**: 81 feature columns (37 continuous/discrete numerical features, 43 nominal/ordinal categorical features, 1 target label).
-* **In-Memory Footprint**: Raw uncompressed CSV: 1.41 MB; In-memory Pandas DataFrame: 1.84 MB (unoptimized) / 0.62 MB (category-optimized dtypes).
-* **Target Variable (y)**: SalePrice (Continuous Float in USD). Range: $12,789.00 to $755,000.00; Mean: $180,796.10; Median: $160,000.00; Std Dev: $79,886.69.
-
-### 1.2 Detailed Feature Schema & Statistical Distributions
-
-| Column Name | Data Type | Role / Category | Statistical Range / Unique Values | Missing % (Raw Data) |
-| :--- | :--- | :--- | :--- | :--- |
-| **PID** | Int64 | Identifier | 1000100 to 1000500 (2,930 unique) | 0.00% (0 rows) |
-| **SalePrice** | Float64 | Target Label (y) | $12,789.00 – $755,000.00 (µ=$180.7k) | 0.00% (0 rows) |
-| **GrLivArea** | Int64 | Numerical Feature | 334 to 5,642 sq ft (µ=1,499.7 sq ft) | 0.00% (0 rows) |
-| **LotFrontage** | Float64 | Numerical Feature | 21.0 to 313.0 linear feet (µ=69.3 ft) | 16.72% (490 rows) |
-| **GarageYrBlt** | Float64 | Numerical Feature | Year 1895 to 2010 (µ=1978.1) | 5.42% (159 rows) |
-| **Neighborhood** | Object (String) | Categorical (Nominal) | 28 unique categories (e.g., NAmes: 443) | 0.00% (0 rows) |
-| **PoolQC** | Object (String) | Categorical (Ordinal) | 4 unique categories (Ex, Gd, TA, Fa) | 99.56% (2,917 rows) |
-| **OverallQual** | Int64 | Numerical (Ordinal) | Rating 1 (Very Poor) to 10 (Very Excellent) | 0.00% (0 rows) |
-
-### 1.3 Ethical Governance, Legal Protections & PII Anonymization
-* **PII Anonymization Protocol**: The PID (Parcel Identification Number) is cryptographically hashed using SHA-256 algorithm (hash(PID) -> 64-char hex string) to prevent reverse property lookup and protect homeowner identity.
-* **Fair Housing Compliance**: Strict compliance with Fair Housing Act guidelines: demographic data (race, ethnicity, income tier, census tract codes) are strictly purged to prevent algorithmic bias.
-* **Open Data Licensing**: Dataset sourced under Creative Commons CC0 1.0 Universal (Public Domain Dedication). Commercial reuse and machine learning pipeline integration legally verified.
-* **Scraping & API Limits**: For supplemental market API pulls (e.g., Google Maps Geocoding API for neighborhood coordinates), HTTP requests are throttled to a maximum of 5 requests/sec with mandatory backoff retries.
-
----
-
-## Section 2: Data Pipeline Architecture & Preprocessing Logic
-
-### 2.1 Project Lifecycle Overview
-The data pipeline follows a structured 5-stage technical flow to ensure zero data leakage between training and testing sets:
-* Stage 1: Ingestion & Dataset Splitting (80% Train, 20% Test Holdout)
-* Stage 2: Missing Value Imputation & Hard Drop Rules (>80% missing dropped)
-* Stage 3: Outlier Isolation (Interquartile Range / IQR Filtering)
-* Stage 4: Feature Engineering & Log-Transformation (ln(SalePrice))
-* Stage 5: Encoding, Scaling & Pipeline Serialization (.joblib)
-
-### 2.2 Visual Data Pipeline Diagram
-```text
-STAGE 1: INGESTION & DATASET SPLITTING (Prevent Data Leakage)
-  ├─► Raw CSV Import (N = 2,930 rows) -> SHA-256 PII Hashing
-  └─► Train-Test Split: Train Set (80%, n = 2,344 rows) | Test Holdout Set (20%, n = 586 rows)
-
-STAGE 2: MISSING VALUE IMPUTATION & DROPPING RULE
-  ├─► Hard Drop Rule: Features with Missingness > 80% (PoolQC: 99.56%, MiscFeature: 96.42%) DROPPED
-  ├─► Continuous Numerical Imputation: SimpleImputer(strategy='median') [e.g., LotFrontage = 68.0 ft]
-  └─► Categorical Imputation: SimpleImputer(strategy='constant', fill_value='None') [e.g., GarageType]
-
-STAGE 3: OUTLIER ISOLATION (IQR Boundary Filtering)
-  ├─► Interquartile Range (IQR) = Q3 - Q1 = 1,745 sq ft - 1,126 sq ft = 619 sq ft
-  ├─► Upper Bound = Q3 + (1.5 * IQR) = 1,745 + (1.5 * 619) = 2,673.5 sq ft
-  └─► Outlier Rule: Remove 5 instances with GrLivArea > 4,000 sq ft AND SalePrice < $200,000
-
-STAGE 4: FEATURE ENGINEERING & MATHEMATICAL TRANSFORMATIONS
-  ├─► Total_SF = GrLivArea + TotalBsmtSF + 1stFlrSF + 2ndFlrSF
-  ├─► Property_Age = YrSold - YearBuilt | Remodeled_Age = YrSold - YearRemodAdd
-  └─► Target Transformation: Log-Transform y_train -> y_train_log = ln(SalePrice)
-
-STAGE 5: ENCODING, SCALING & PIPELINE SERIALIZATION
-  ├─► OneHotEncoder(drop='first', sparse_output=False) on 43 nominal features (Expansion: 43 -> 218 cols)
-  ├─► StandardScaler(z = (x - µ) / σ) on 37 continuous numerical features
-  └─► Save Trained ColumnTransformer Pipeline -> preprocessor_v2.joblib (142 KB)
